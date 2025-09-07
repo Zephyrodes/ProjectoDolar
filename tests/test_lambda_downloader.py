@@ -5,32 +5,29 @@ sys.path.append(os.path.dirname(os.path.dirname(__file__)))
 import json
 import pytest
 from unittest.mock import patch, MagicMock
-from lambdaProcesador import lambda_handler, s3, BUCKET_NAME  # BUCKET_NAME si lo defines
-
-@pytest.fixture
-def s3_event():
-    """Evento simulado de S3 para lambdaProcesador"""
-    return {
-        "Records": [
-            {
-                "s3": {
-                    "bucket": {"name": "mi-bucket-prueba"},
-                    "object": {"key": "datos/dolar.json"}
-                }
-            }
-        ]
-    }
+from lambdaDescargar import lambda_handler, s3, BUCKET_NAME
 
 class FakeS3Client:
-    def get_object(self, Bucket, Key):
-        fake_data = [["1757077268000", "3959"]]
-        return {"Body": json.dumps(fake_data).encode()}
+    def put_object(self, Bucket, Key, Body):
+        # Simula la respuesta de S3
+        return {"ResponseMetadata": {"HTTPStatusCode": 200}}
 
-def test_lambda_handler_response(s3_event):
-    """Verifica que lambdaProcesador devuelva un mensaje de éxito"""
+def test_lambda_handler_runs():
+    """Prueba lambdaDescargar sin credenciales ni requests reales"""
+    
     # Patch al s3 real dentro del módulo
-    with patch.object(sys.modules['lambdaProcesador'], 's3', new=FakeS3Client()):
-        result = lambda_handler(s3_event, None)
+    with patch.object(sys.modules['lambdaDescargar'], 's3', new=FakeS3Client()):
+        # Patch a requests.get para devolver datos simulados
+        fake_data = [["1757077268000", "3959"], ["1757077299000", "3960.3333"]]
+        fake_response = MagicMock()
+        fake_response.json.return_value = fake_data
+        fake_response.raise_for_status.return_value = None
 
+        with patch("lambdaDescargar.requests.get", return_value=fake_response):
+            result = lambda_handler({}, None)
+    
+    # Verificaciones básicas
     assert "status" in result
     assert result["status"] == "ok"
+    assert result["bucket"] == BUCKET_NAME
+    assert result["file"].startswith("dolar-")
