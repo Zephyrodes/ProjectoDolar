@@ -1,4 +1,4 @@
-name: CI/CD - Tests + Zappa
+name: CI/CD - Lambda Tests + Zappa Deploy
 
 on:
   push:
@@ -28,14 +28,15 @@ jobs:
         pip install -r requirements.txt
         pip install zappa
 
-    # 4️⃣ Ejecutar tests
+    # 4️⃣ Ejecutar tests de Lambda
     - name: Run Lambda tests
       run: pytest --maxfail=1 --disable-warnings -q
 
-    # 5️⃣ Desplegar Lambda con Zappa
+    # 5️⃣ Desplegar Lambda con Zappa usando rol temporal
     - name: Deploy Lambda with Zappa
       env:
         AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
         AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        AWS_SESSION_TOKEN: ${{ secrets.AWS_SESSION_TOKEN }}
         AWS_DEFAULT_REGION: ${{ secrets.AWS_DEFAULT_REGION }}
       run: zappa update dev
