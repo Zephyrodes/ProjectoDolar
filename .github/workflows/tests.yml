@@ -21,16 +21,20 @@ jobs:
       with:
         python-version: "3.10"
 
-    # 3️⃣ Instalar dependencias
-    - name: Install dependencies
+    # 3️⃣ Crear y activar virtualenv + instalar dependencias
+    - name: Setup virtualenv and install dependencies
       run: |
+        python -m venv venv
+        source venv/bin/activate
         python -m pip install --upgrade pip
         pip install -r requirements.txt
         pip install zappa
 
     # 4️⃣ Ejecutar tests de Lambda
     - name: Run Lambda tests
-      run: pytest --maxfail=1 --disable-warnings -q
+      run: |
+        source venv/bin/activate
+        pytest --maxfail=1 --disable-warnings -q
 
     # 5️⃣ Desplegar Lambda con Zappa usando variables de entorno
     - name: Deploy Lambda with Zappa
@@ -40,7 +44,7 @@ jobs:
         AWS_SESSION_TOKEN: ${{ secrets.AWS_SESSION_TOKEN }}
         AWS_DEFAULT_REGION: ${{ secrets.AWS_DEFAULT_REGION }}
       run: |
-        source venv/bin/activate || true
-        # Zappa tomará las variables de entorno y no buscará ningún profile
+        source venv/bin/activate
+        # Zappa tomará automáticamente las variables de entorno y no buscará ningún profile
         zappa update dev
         zappa update processor
