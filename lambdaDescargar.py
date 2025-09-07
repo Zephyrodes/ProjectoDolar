@@ -1,32 +1,36 @@
-import sys
-import os
-sys.path.append(os.path.dirname(os.path.dirname(__file__)))
-
 import json
-import pytest
-from unittest.mock import patch, MagicMock
-from lambdaDescargar import lambda_handler, s3, BUCKET_NAME
+import boto3
+import requests
+from datetime import datetime
+import pytz
 
-class FakeS3Client:
-    def put_object(self, Bucket, Key, Body):
-        return {"ResponseMetadata": {"HTTPStatusCode": 200}}
+s3 = boto3.client("s3")
+BUCKET_NAME = "dolaridraw"
 
-def test_lambda_handler_runs():
-    """Prueba lambdaDescargar sin credenciales ni requests reales"""
-    
-    # Parcheamos el s3 ya creado
-    with patch.object(sys.modules['lambdaDescargar'], 's3', new=FakeS3Client()):
-        # Parcheamos requests.get
-        fake_data = [["1757077268000", "3959"]]
-        fake_response = MagicMock()
-        fake_response.json.return_value = fake_data
-        fake_response.raise_for_status.return_value = None
+def lambda_handler(event, context):
+    """
+    Lambda que descarga los valores del dólar del Banco de la República
+    y los guarda en un archivo dolar-<timestamp>.json dentro de S3.
+    """
 
-        with patch("lambdaDescargar.requests.get", return_value=fake_response):
-            result = lambda_handler({}, None)
-    
-    # Verificaciones básicas
-    assert "status" in result
-    assert result["status"] == "ok"
-    assert result["bucket"] == BUCKET_NAME
-    assert result["file"].startswith("dolar-")
+    url = "https://totoro.banrep.gov.co/estadisticas-economicas/rest/consultaDatosService/consultaMercadoCambiario"
+
+    # Llamado a la API
+    response = requests.get(url)
+    response.raise_for_status()
+    data = response.json()
+
+    # Timestamp en hora local Bogotá
+    tz = pytz.timezone("America/Bogota")
+    timestamp = datetime.now(tz).strftime("%Y%m%d-%H%M%S")
+
+    filename = f"dolar-{timestamp}.json"
+
+    # Guardar en S3
+    s3.put_object(
+        Bucket=BUCKET_NAME,
+        Key=filename,
+        Body=json.dumps(data),
+    )
+
+    return {"status": "ok", "bucket": BUCKET_NAME, "file": filename}
