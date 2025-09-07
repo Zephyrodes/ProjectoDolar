@@ -33,11 +33,12 @@ jobs:
     - name: Run Lambda tests
       run: pytest --maxfail=1 --disable-warnings -q
 
-    # 5️⃣ Desplegar Lambda con Zappa usando variables de entorno
+    # 5️⃣ Desplegar Lambda con Zappa usando variables de entorno y sin perfil
     - name: Deploy Lambda with Zappa
       run: |
         export AWS_ACCESS_KEY_ID=${{ secrets.AWS_ACCESS_KEY_ID }}
         export AWS_SECRET_ACCESS_KEY=${{ secrets.AWS_SECRET_ACCESS_KEY }}
         export AWS_SESSION_TOKEN=${{ secrets.AWS_SESSION_TOKEN }}
         export AWS_DEFAULT_REGION=${{ secrets.AWS_DEFAULT_REGION }}
+        export AWS_PROFILE=""
         zappa update dev
