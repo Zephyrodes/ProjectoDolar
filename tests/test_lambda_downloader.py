@@ -3,17 +3,15 @@ import os
 sys.path.append(os.path.dirname(os.path.dirname(__file__)))
 
 import pytest
-import boto3
+from unittest.mock import patch
 from lambdaDescargar import lambda_handler
 
-def test_lambda_handler_runs(monkeypatch):
-    """Prueba básica de lambdaDescargar"""
-    class FakeS3Client:
-        def put_object(self, Bucket, Key, Body):
-            return {"ResponseMetadata": {"HTTPStatusCode": 200}}
-    
-    # Monkeypatch correcto
-    monkeypatch.setattr(boto3, "client", lambda *_: FakeS3Client())
-    
-    result = lambda_handler({}, None)
-    assert "status" in result
+class FakeS3Client:
+    def put_object(self, Bucket, Key, Body):
+        return {"ResponseMetadata": {"HTTPStatusCode": 200}}
+
+def test_lambda_handler_runs():
+    """Prueba lambdaDescargar sin credenciales reales"""
+    with patch("lambdaDescargar.boto3.client", return_value=FakeS3Client()):
+        result = lambda_handler({}, None)
+        assert "status" in result
