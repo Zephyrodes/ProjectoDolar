@@ -1,0 +1,52 @@
+{
+    "dev": {
+        "lambda_function": "lambdaDescargar.lambda_handler",
+        "aws_region": "us-east-1",
+        "exclude": [
+            "boto3",
+            "dateutil",
+            "botocore",
+            "s3transfer",
+            "concurrent"
+        ],
+        "profile_name": "default",
+        "project_name": "projectodolar",
+        "runtime": "python3.10",
+        "s3_bucket": "zappa-h3fqxo92p",
+        "events": [{
+            "function": "lambdaDescargar.lambda_handler",
+            "expression": "cron(0 23 * * ? *)"
+        }],
+        "keep_warm": false,
+        "apigateway_enabled": false,
+        "manage_roles": false,
+        "role_name": "LabRole"
+    },
+
+    "processor": {
+        "lambda_function": "lambdaProcesador.lambda_handler",
+        "aws_region": "us-east-1",
+        "exclude": [
+            "boto3",
+            "dateutil",
+            "botocore",
+            "s3transfer",
+            "concurrent"
+        ],
+        "profile_name": "default",
+        "project_name": "projectodolar-processor",
+        "runtime": "python3.10",
+        "s3_bucket": "zappa-h3fqxo92p",
+        "keep_warm": false,
+        "apigateway_enabled": false,
+        "manage_roles": false,
+        "role_name": "LabRole"
+        "events": [{
+            "event_source": {
+                "arn": "arn:aws:s3:::dolaridraw",
+                "events": ["s3:ObjectCreated:*"]
+            },
+            "function": "lambdaProcesador.lambda_handler"
+        }]
+    }
+}
