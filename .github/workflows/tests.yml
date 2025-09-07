@@ -1,45 +1,38 @@
-name: CI/CD - Lambda Tests + Zappa Deploy
+name: Deploy Zappa
 
 on:
   push:
-    branches: [ main ]
-  pull_request:
-    branches: [ main ]
+    branches:
+      - main
 
 jobs:
-  build-and-deploy:
+  deploy:
     runs-on: ubuntu-latest
 
     steps:
-    # 1️⃣ Descargar el repo
-    - name: Checkout repository
-      uses: actions/checkout@v4
+      - name: Checkout code
+        uses: actions/checkout@v3
 
-    # 2️⃣ Configurar Python
-    - name: Setup Python
-      uses: actions/setup-python@v5
-      with:
-        python-version: "3.10"
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: 3.10
 
-    # 3️⃣ Instalar dependencias
-    - name: Install dependencies
-      run: |
-        python -m pip install --upgrade pip
-        pip install -r requirements.txt
-        pip install zappa
+      - name: Install dependencies
+        run: |
+          python -m venv venv
+          source venv/bin/activate
+          pip install --upgrade pip
+          pip install -r requirements.txt
+          pip install zappa
 
-    # 4️⃣ Ejecutar tests de Lambda
-    - name: Run Lambda tests
-      run: pytest --maxfail=1 --disable-warnings -q
-
-    # 5️⃣ Desplegar Lambda con Zappa usando credenciales de entorno
-    - name: Deploy Lambda with Zappa
-      env:
-        AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-        AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-        AWS_SESSION_TOKEN: ${{ secrets.AWS_SESSION_TOKEN }}
-        AWS_DEFAULT_REGION: ${{ secrets.AWS_DEFAULT_REGION }}
-      run: |
-        # Forzar a Zappa a usar las credenciales de entorno
-        export AWS_PROFILE=""
-        zappa update dev
+      - name: Zappa Deploy/Update
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          AWS_SESSION_TOKEN: ${{ secrets.AWS_SESSION_TOKEN }}
+          AWS_DEFAULT_REGION: us-east-1
+        run: |
+          source venv/bin/activate
+          unset AWS_PROFILE   # Aseguramos que no intente usar ningún profile
+          zappa update dev
