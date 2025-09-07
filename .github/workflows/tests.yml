@@ -40,12 +40,7 @@ jobs:
         AWS_SESSION_TOKEN: ${{ secrets.AWS_SESSION_TOKEN }}
         AWS_DEFAULT_REGION: ${{ secrets.AWS_DEFAULT_REGION }}
       run: |
-        # Forzar boto3 a NO usar ningún profile
-        export AWS_PROFILE=
-        python - <<EOF
-import os, subprocess
-# Eliminar AWS_PROFILE por si existe
-os.environ.pop("AWS_PROFILE", None)
-# Ejecutar Zappa update
-subprocess.run(["zappa", "update", "dev"], check=True)
-EOF
+        # Eliminar AWS_PROFILE por si existe
+        unset AWS_PROFILE
+        # Ejecutar Zappa update directamente
+        zappa update dev
