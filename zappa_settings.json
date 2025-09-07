@@ -9,7 +9,7 @@
             "s3transfer",
             "concurrent"
         ],
-        "profile_name": "default",
+        "profile_name": "null",
         "project_name": "projectodolar",
         "runtime": "python3.10",
         "s3_bucket": "zappa-h3fqxo92p",
@@ -33,14 +33,14 @@
             "s3transfer",
             "concurrent"
         ],
-        "profile_name": "default",
+        "profile_name": "null",
         "project_name": "projectodolar-processor",
         "runtime": "python3.10",
         "s3_bucket": "zappa-h3fqxo92p",
         "keep_warm": false,
         "apigateway_enabled": false,
         "manage_roles": false,
-        "role_name": "LabRole"
+        "role_name": "LabRole",
         "events": [{
             "event_source": {
                 "arn": "arn:aws:s3:::dolaridraw",
