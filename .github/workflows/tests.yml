@@ -1,4 +1,4 @@
-name: CI/CD - Lambda Tests + Zappa Deploy
+name: CI/CD - Lambda Tests + Zappa Deploy + FastAPI EC2
 
 on:
   push:
@@ -48,3 +48,136 @@ jobs:
         # Zappa tomará automáticamente las variables de entorno y no buscará ningún profile
         zappa update dev
         zappa update processor
+
+    # 6️⃣ Desplegar FastAPI en EC2 via SSH
+    - name: Deploy FastAPI to EC2
+      uses: appleboy/ssh-action@v1.0.3
+      with:
+        host: ${{ secrets.EC2_HOST }}
+        username: ${{ secrets.EC2_USER }}
+        key: ${{ secrets.EC2_SSH_KEY }}
+        script: |
+          cd name: CI/CD - Lambda Tests + Zappa Deploy + FastAPI EC2
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+    # 1️⃣ Descargar el repo
+    - name: Checkout repository
+      uses: actions/checkout@v4
+
+    # 2️⃣ Configurar Python
+    - name: Setup Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: "3.10"
+
+    # 3️⃣ Crear y activar virtualenv + instalar dependencias
+    - name: Setup virtualenv and install dependencies
+      run: |
+        python -m venv venv
+        source venv/bin/activate
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
+        pip install zappa
+
+    # 4️⃣ Ejecutar tests de Lambda
+    - name: Run Lambda tests
+      run: |
+        source venv/bin/activate
+        pytest --maxfail=1 --disable-warnings -q
+
+    # 5️⃣ Desplegar Lambda con Zappa usando variables de entorno
+    - name: Deploy Lambda with Zappa
+      env:
+        AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        AWS_SESSION_TOKEN: ${{ secrets.AWS_SESSION_TOKEN }}
+        AWS_DEFAULT_REGION: ${{ secrets.AWS_DEFAULT_REGION }}
+      run: |
+        source venv/bin/activate
+        # Zappa tomará automáticamente las variables de entorno y no buscará ningún profile
+        zappa update dev
+        zappa update processor
+
+    # 6️⃣ Desplegar FastAPI en EC2 via SSH
+    - name: Deploy FastAPI to EC2
+      uses: appleboy/ssh-action@v1.0.3
+      with:
+        host: ${{ secrets.EC2_HOST }}
+        username: ${{ secrets.EC2_USER }}
+        key: ${{ secrets.EC2_SSH_KEY }}
+        script: |
+          cd name: CI/CD - Lambda Tests + Zappa Deploy + FastAPI EC2
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+    # 1️⃣ Descargar el repo
+    - name: Checkout repository
+      uses: actions/checkout@v4
+
+    # 2️⃣ Configurar Python
+    - name: Setup Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: "3.10"
+
+    # 3️⃣ Crear y activar virtualenv + instalar dependencias
+    - name: Setup virtualenv and install dependencies
+      run: |
+        python -m venv venv
+        source venv/bin/activate
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
+        pip install zappa
+
+    # 4️⃣ Ejecutar tests de Lambda
+    - name: Run Lambda tests
+      run: |
+        source venv/bin/activate
+        pytest --maxfail=1 --disable-warnings -q
+
+    # 5️⃣ Desplegar Lambda con Zappa usando variables de entorno
+    - name: Deploy Lambda with Zappa
+      env:
+        AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        AWS_SESSION_TOKEN: ${{ secrets.AWS_SESSION_TOKEN }}
+        AWS_DEFAULT_REGION: ${{ secrets.AWS_DEFAULT_REGION }}
+      run: |
+        source venv/bin/activate
+        # Zappa tomará automáticamente las variables de entorno y no buscará ningún profile
+        zappa update dev
+        zappa update processor
+
+    # 6️⃣ Desplegar FastAPI en EC2 via SSH
+    - name: Deploy FastAPI to EC2
+      uses: appleboy/ssh-action@v1.0.3
+      with:
+        host: ${{ secrets.EC2_HOST }}
+        username: ${{ secrets.EC2_USER }}
+        key: ${{ secrets.EC2_SSH_KEY }}
+        script: |
+          cd /home/ubuntu/ProjectoDolar
+          git fetch origin main
+          git reset --hard origin/main
+          source venv/bin/activate
+          pip install -r requirements.txt
+          sudo systemctl restart fastapi.service
