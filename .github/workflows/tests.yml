@@ -45,12 +45,21 @@ jobs:
         AWS_DEFAULT_REGION: ${{ secrets.AWS_DEFAULT_REGION }}
       run: |
         source venv/bin/activate
-        # Zappa tomará automáticamente las variables de entorno y no buscará ningún profile
         zappa update dev
         zappa update processor
 
-    # 6️⃣ Desplegar FastAPI en EC2 via SSH
-    - name: Deploy FastAPI to EC2
+    # 6️⃣ Copiar el código FastAPI (solo la carpeta fastapi/) a la EC2
+    - name: Copy FastAPI code to EC2
+      uses: appleboy/scp-action@v0.1.7
+      with:
+        host: ${{ secrets.EC2_HOST }}
+        username: ${{ secrets.EC2_USER }}
+        key: ${{ secrets.EC2_SSH_KEY }}
+        source: "fastapi/*"
+        target: "/home/ubuntu/ProjectoDolar"
+
+    # 7️⃣ Instalar dependencias + reiniciar FastAPI en la EC2
+    - name: Restart FastAPI service
       uses: appleboy/ssh-action@v1.0.3
       with:
         host: ${{ secrets.EC2_HOST }}
@@ -58,8 +67,7 @@ jobs:
         key: ${{ secrets.EC2_SSH_KEY }}
         script: |
           cd /home/ubuntu/ProjectoDolar
-          git fetch origin main
-          git reset --hard origin/main
+          python3 -m venv venv
           source venv/bin/activate
           pip install -r requirements.txt
           sudo systemctl restart fastapi.service
