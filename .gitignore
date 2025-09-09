@@ -1,0 +1,21 @@
+# Virtual environments
+venv/
+.venv/
+
+# Archivos de Python compilados
+__pycache__/
+*.pyc
+
+# Archivos de entorno
+.env
+
+# Llaves privadas
+*.pem
+
+# Configuración de IDEs
+.vscode/
+.idea/
+
+# Archivos de sistema
+.DS_Store
+
