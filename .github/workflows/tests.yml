@@ -48,15 +48,15 @@ jobs:
         zappa update dev
         zappa update processor
 
-    # 6️⃣ Copiar el código FastAPI a la EC2
+    # 6️⃣ Copiar el código FastAPI (backend) a la EC2
     - name: Copy FastAPI code to EC2
       uses: appleboy/scp-action@v0.1.7
       with:
         host: ${{ secrets.EC2_HOST }}
         username: ${{ secrets.EC2_USER }}
         key: ${{ secrets.EC2_SSH_KEY }}
-        source: "fastapi/*"
-        target: "/home/ubuntu/ProjectoDolar/fastapi"
+        source: "backend/*"
+        target: "/home/ubuntu/ProjectoDolar/backend"
 
     # 7️⃣ Instalar dependencias de FastAPI + reiniciar el servicio en la EC2
     - name: Restart FastAPI service
@@ -66,7 +66,7 @@ jobs:
         username: ${{ secrets.EC2_USER }}
         key: ${{ secrets.EC2_SSH_KEY }}
         script: |
-          cd /home/ubuntu/ProjectoDolar/fastapi
+          cd /home/ubuntu/ProjectoDolar/backend
           python3 -m venv venv
           source venv/bin/activate
           pip install --upgrade pip
