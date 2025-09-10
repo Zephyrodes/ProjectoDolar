@@ -80,7 +80,7 @@ Este flujo asegura calidad en el código y despliegue confiable en producción.
 
 ## Conclusión
 
-El proyecto cumple con los tres puntos planteados en el enunciado del parcial:
+El proyecto contiene estos aspectos fundamentales:
 
 1. Ingesta automática con **Lambda + Zappa + S3**.  
 2. Procesamiento y almacenamiento en **RDS** con Lambda y triggers de S3.  
