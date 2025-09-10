@@ -6,6 +6,7 @@ from backend.main import app
 
 client = TestClient(app)
 
+
 def test_consultar_success():
     """Consulta exitosa al endpoint"""
     fake_cursor = MagicMock()
@@ -16,7 +17,8 @@ def test_consultar_success():
     fake_conn = MagicMock()
     fake_conn.cursor.return_value = fake_cursor
 
-    with patch("main.psycopg2.connect", return_value=fake_conn):
+    # 🔹 Cambiado a backend.main
+    with patch("backend.main.psycopg2.connect", return_value=fake_conn):
         response = client.post(
             "/consultar",
             json={"fecha_inicio": "2025-09-01", "fecha_fin": "2025-09-03"},
@@ -35,7 +37,8 @@ def test_consultar_db_failure():
     fake_cursor.execute.side_effect = Exception("DB failure")
     fake_conn.cursor.return_value = fake_cursor
 
-    with patch("main.psycopg2.connect", return_value=fake_conn):
+    # 🔹 Cambiado a backend.main
+    with patch("backend.main.psycopg2.connect", return_value=fake_conn):
         response = client.post(
             "/consultar",
             json={"fecha_inicio": "2025-09-01", "fecha_fin": "2025-09-03"},
