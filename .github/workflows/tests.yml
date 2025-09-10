@@ -34,6 +34,7 @@ jobs:
     - name: Run all tests
       run: |
         source venv/bin/activate
+        export PYTHONPATH=$PYTHONPATH:$(pwd)
         pytest tests/ --maxfail=1 --disable-warnings -q
 
     # 5️⃣ Desplegar Lambda con Zappa
@@ -48,7 +49,7 @@ jobs:
         zappa update dev
         zappa update processor
 
-    # 6️⃣ Copiar el código FastAPI (backend) a la EC2
+    # 6️⃣ Copiar el código FastAPI a la EC2
     - name: Copy FastAPI code to EC2
       uses: appleboy/scp-action@v0.1.7
       with:
