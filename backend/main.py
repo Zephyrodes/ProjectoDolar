@@ -59,3 +59,7 @@ def consultar(data: Consulta):
                 conn.close()
             except Exception:
                 pass
+
+@app.get("/saludo")
+def saludo():
+    return {"mensaje": "Hola Big Data"}
